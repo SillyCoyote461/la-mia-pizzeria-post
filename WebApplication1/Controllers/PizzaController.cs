@@ -10,20 +10,53 @@ namespace WebApplication1.Controllers
         public PizzaController(ILogger<PizzaController> logger)
         {
             _logger = logger;
+
         }
 
         public IActionResult Index()
         {
-            using var context = new PizzaContext();
-            var pizzas = context.Pizzas.ToArray();
+            using var _context = new PizzaContext();
+            var pizzas = _context.Pizzas.ToArray();
             return View(pizzas);
         }
 
         public IActionResult Details(int id)
         {
-            using var context = new PizzaContext();
-            var pizza = context.Pizzas.SingleOrDefault(p => p.Id == id);
+            var _context = new PizzaContext();
+            Pizza pizza = _context.Pizzas.FirstOrDefault(p => p.Id == id);
             return View(pizza);
+        }
+
+        [HttpGet]
+
+        public IActionResult Create()
+        {
+
+            return View("Create");
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create( Pizza pizza )
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Create", pizza);
+            }
+
+            Pizza record = new Pizza();
+            record.Name = pizza.Name;
+            record.Description = pizza.Description;
+            record.Price = pizza.Price;
+            record.Image = pizza.Image;
+
+            using var _context = new PizzaContext();
+
+            _context.Pizzas.Add(record);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
         }
     }
 }
